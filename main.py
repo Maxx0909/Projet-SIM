@@ -6,7 +6,8 @@ height = 720
 from graphicPipeline import GraphicPipeline
 
 
-pipeline = GraphicPipeline(width,height)
+pipeline1 = GraphicPipeline(width,height)
+pipeline2 = GraphicPipeline(width,height)
 
 
 from camera import Camera
@@ -34,6 +35,8 @@ from readply import readply
 
 vertices, triangles = readply('suzanne.ply')
 
+vertices2, triangles2 = readply('suzanne2.ply')
+
 data = dict([
   ('viewMatrix',cam.getMatrix()),
   ('projMatrix',proj.getMatrix()),
@@ -41,8 +44,16 @@ data = dict([
   ('lightPosition',lightPosition),
 ])
 
-pipeline.draw(vertices, triangles, data)
+alpha1 = 0.51
+alpha2 = 0.49
+
+pipeline1.draw(vertices, triangles, data, alpha1)
+
+pipeline2.draw(vertices2, triangles2, data, alpha2)
+
+# On additionne les deux images pour le rendu final
+pipeline3 = pipeline1.image + pipeline2.image
 
 import matplotlib.pyplot as plt
-imgplot = plt.imshow(pipeline.image)
+imgplot = plt.imshow(pipeline3)
 plt.show()

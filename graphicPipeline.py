@@ -1,18 +1,22 @@
 import numpy as np
 
 class Fragment:
-    def __init__(self, x : int, y : int, depth : float, interpolated_data ):
+    def __init__(self, x : int, y : int, depth : float, interpolated_data , alpha : float):
         self.x = x
         self.y = y
         self.depth = depth
+        self.alpha = alpha      # entre 0 et 1 inclus (peut-etre a fixer pour plus tard)
         self.interpolated_data = interpolated_data
         self.output = []
+
 
 def edgeSide(p, v0, v1) : 
     return (p[0]-v0[0])*(v1[1]-v0[1]) - (p[1]-v0[1])*(v1[0]-v0[0])
 
+
 def edgeSide3D(p,v0,v1) :
     return np.linalg.norm(np.cross(p[0:3]-v0[0:3],v1[0:3]-v0[0:3]))
+
 
 class GraphicPipeline:
     def __init__ (self, width, height):
@@ -53,7 +57,7 @@ class GraphicPipeline:
         return outputVertices
 
 
-    def Rasterizer(self, v0, v1, v2) :
+    def Rasterizer(self, v0, v1, v2, alpha) :
         fragments = []
 
         #culling back face
@@ -133,11 +137,12 @@ class GraphicPipeline:
                     interpolated_data = v0[3:l] * lambda0 + v1[3:l] * lambda1 + v2[3:l] * lambda2
                     
                     #Emiting Fragment
-                    fragments.append(Fragment(i,j,z, interpolated_data))
+                    fragments.append(Fragment(i,j,z, interpolated_data, alpha))
 
         return fragments
     
-    def fragmentShader(self,fragment,data):
+
+    def fragmentShader(self,fragment,data, alpha):
         #unpacking and normalizing interpolated data
         N = fragment.interpolated_data[0:3]
         N = N/np.linalg.norm(N)
@@ -164,21 +169,33 @@ class GraphicPipeline:
         #applying the toon effect
         phong = np.ceil(phong*4 +1 )/6.0
 
-        color = np.array([phong,phong,phong])
+        # Pour avoir des objets en couleurs
+        # "Pb": est fait en fonction de la valeur de l'alpha, faire en sorte qu'on 
+        #       puisse mettre les valeurs dans [0, 255] puis de normaliser après
+        r = 0.0     # rouge
+        g = 1.0     # vert
+        b = 0.0     # bleu
+        if fragment.alpha == 0.49:      # faire d'une autre manière
+            r = 0.0
+            g = 0.0
+            b = 1.0
 
-        fragment.output = color
+        color = np.array([r, g, b])
 
-    def draw(self, vertices, triangles, data):
+        fragment.output = fragment.alpha * color + (1 - fragment.alpha) * alpha
+        
+
+    def draw(self, vertices, triangles, data, alpha):
         #Calling vertex shader
         newVertices = self.VertexShader(vertices, data)
         
         fragments = []
         #Calling Rasterizer
         for i in triangles :
-            fragments.extend(self.Rasterizer(newVertices[i[0]], newVertices[i[1]], newVertices[i[2]]))
+            fragments.extend(self.Rasterizer(newVertices[i[0]], newVertices[i[1]], newVertices[i[2]], alpha))
         
         for f in fragments:
-            self.fragmentShader(f,data)
+            self.fragmentShader(f,data, alpha)
             #depth test
             if self.depthBuffer[f.y][f.x] > f.depth : 
                 self.depthBuffer[f.y][f.x] = f.depth
