@@ -8,6 +8,7 @@ from graphicPipeline import GraphicPipeline
 
 pipeline1 = GraphicPipeline(width,height)
 pipeline2 = GraphicPipeline(width,height)
+pipeline3 = GraphicPipeline(width,height)
 
 
 from camera import Camera
@@ -37,6 +38,8 @@ vertices, triangles = readply('suzanne.ply')
 
 vertices2, triangles2 = readply('suzanne2.ply')
 
+# vertices3, triangles3 = readply('cube3.ply')
+
 data = dict([
   ('viewMatrix',cam.getMatrix()),
   ('projMatrix',proj.getMatrix()),
@@ -44,16 +47,19 @@ data = dict([
   ('lightPosition',lightPosition),
 ])
 
-alpha1 = 0.51
-alpha2 = 0.49
+alpha1 = 0.99
+alpha2 = 1
+alpha3 = 0.98
 
 pipeline1.draw(vertices, triangles, data, alpha1)
 
 pipeline2.draw(vertices2, triangles2, data, alpha2)
 
+# pipeline3.draw(vertices3, triangles3, data, alpha3)
+
 # On additionne les deux images pour le rendu final
-pipeline3 = pipeline1.image + pipeline2.image
+pipeline4 = pipeline1.image + pipeline2.image #+ pipeline3.image
 
 import matplotlib.pyplot as plt
-imgplot = plt.imshow(pipeline3)
+imgplot = plt.imshow(pipeline4)
 plt.show()

@@ -170,17 +170,23 @@ class GraphicPipeline:
         phong = np.ceil(phong*4 +1 )/6.0
 
         # Pour avoir des objets en couleurs
-        # "Pb": est fait en fonction de la valeur de l'alpha, faire en sorte qu'on 
-        #       puisse mettre les valeurs dans [0, 255] puis de normaliser après
         r = 0.0     # rouge
         g = 1.0     # vert
         b = 0.0     # bleu
-        if fragment.alpha == 0.49:      # faire d'une autre manière
+        if fragment.alpha == 1:      # faire d'une autre manière
             r = 0.0
             g = 0.0
             b = 1.0
+        elif fragment.alpha == 0.98:      # faire d'une autre manière
+            r = 0.0
+            g = 1.0
+            b = 0.0
+        else :
+            r = 1.0
+            g = 0.0
+            b = 0.0        
 
-        color = np.array([r, g, b])
+        color = np.array([r*phong, g*phong, b*phong])
 
         fragment.output = fragment.alpha * color + (1 - fragment.alpha) * alpha
         
