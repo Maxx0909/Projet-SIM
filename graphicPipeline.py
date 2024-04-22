@@ -5,7 +5,7 @@ class Fragment:
         self.x = x
         self.y = y
         self.depth = depth
-        self.alpha = alpha      # entre 0 et 1 inclus
+        self.alpha = alpha      # entre 0 et 1 inclus 
         self.interpolated_data = interpolated_data
         self.output = []
 
@@ -150,6 +150,7 @@ class GraphicPipeline:
     
 
     def fragmentShader(self,fragment,data, alpha, color):
+    def fragmentShader(self,fragment,data, alpha, color):
         #unpacking and normalizing interpolated data
         N = fragment.interpolated_data[0:3]
         N = N/np.linalg.norm(N)
@@ -174,12 +175,13 @@ class GraphicPipeline:
         phong = ka * ambient + kd * diffuse + ks * specular
 
         #applying the toon effect
-        phong = np.ceil(phong*4 +1 )/6.0
+        phong = np.ceil(phong*4 +1 )/6.0   
 
         r = color[0]
         v = color[1]
         b = color[2]    
 
+        color = np.array([r*phong, v*phong, b*phong])
         color = np.array([r*phong, v*phong, b*phong])
 
         #Calcul pour l'alpha blending
@@ -197,11 +199,9 @@ class GraphicPipeline:
         
         for f in fragments:
             self.fragmentShader(f,data, alpha, color)
+            self.fragmentShader(f,data, alpha, color)
             #depth test
             if self.depthBuffer[f.y][f.x] > f.depth : 
                 self.depthBuffer[f.y][f.x] = f.depth
                 
                 self.image[f.y][f.x] = f.output
-                
-            
-
