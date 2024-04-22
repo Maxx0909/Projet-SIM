@@ -5,7 +5,7 @@ class Fragment:
         self.x = x
         self.y = y
         self.depth = depth
-        self.alpha = alpha      # entre 0 et 1 inclus (peut-etre a fixer pour plus tard)
+        self.alpha = alpha      # entre 0 et 1 inclus
         self.interpolated_data = interpolated_data
         self.output = []
 
@@ -57,7 +57,7 @@ class GraphicPipeline:
         return outputVertices
 
 
-    def Rasterizer(self, v0, v1, v2, alpha) :
+    def Rasterizer(self, v0, v1, v2, alpha, cube) :
         fragments = []
 
         #culling back face
@@ -110,8 +110,15 @@ class GraphicPipeline:
                 area1 = edgeSide(p,v1,v2)
                 area2 = edgeSide(p,v2,v0)
 
+                #BUG ICI si area2 = 0 pour dessiner un cube : on ne dessine qu'une partie des triangles...
+                #Pour avoir quelque chose de fonctionnel, il faut mettre area2 = 1
+                #Maix cela n'est pas une solution viabble 
+                #Ceci est un fix pour s'assurer d'avoir un programme qui marche
+                if (cube == True):
+                    area2 = 1
+
                 #test if p is inside the triangle
-                if (area0 >= 0 and area1 >= 0 and area2 >= 0) : 
+                if ( area0 >= 0 and area1 >= 0 and area2 >= 0):
                     
                     #Computing 2d barricentric coordinates
                     lambda0 = area1/area
@@ -142,7 +149,7 @@ class GraphicPipeline:
         return fragments
     
 
-    def fragmentShader(self,fragment,data, alpha):
+    def fragmentShader(self,fragment,data, alpha, color):
         #unpacking and normalizing interpolated data
         N = fragment.interpolated_data[0:3]
         N = N/np.linalg.norm(N)
@@ -169,39 +176,27 @@ class GraphicPipeline:
         #applying the toon effect
         phong = np.ceil(phong*4 +1 )/6.0
 
-        # Pour avoir des objets en couleurs
-        r = 0.0     # rouge
-        g = 1.0     # vert
-        b = 0.0     # bleu
-        if fragment.alpha == 1:      # faire d'une autre manière
-            r = 0.0
-            g = 0.0
-            b = 1.0
-        elif fragment.alpha == 0.98:      # faire d'une autre manière
-            r = 0.0
-            g = 1.0
-            b = 0.0
-        else :
-            r = 1.0
-            g = 0.0
-            b = 0.0        
+        r = color[0]
+        v = color[1]
+        b = color[2]    
 
-        color = np.array([r*phong, g*phong, b*phong])
+        color = np.array([r*phong, v*phong, b*phong])
 
+        #Calcul pour l'alpha blending
         fragment.output = fragment.alpha * color + (1 - fragment.alpha) * alpha
         
 
-    def draw(self, vertices, triangles, data, alpha):
+    def draw(self, vertices, triangles, data, alpha, color, cube):
         #Calling vertex shader
         newVertices = self.VertexShader(vertices, data)
         
         fragments = []
         #Calling Rasterizer
         for i in triangles :
-            fragments.extend(self.Rasterizer(newVertices[i[0]], newVertices[i[1]], newVertices[i[2]], alpha))
+            fragments.extend(self.Rasterizer(newVertices[i[0]], newVertices[i[1]], newVertices[i[2]], alpha, cube))
         
         for f in fragments:
-            self.fragmentShader(f,data, alpha)
+            self.fragmentShader(f,data, alpha, color)
             #depth test
             if self.depthBuffer[f.y][f.x] > f.depth : 
                 self.depthBuffer[f.y][f.x] = f.depth
