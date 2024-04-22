@@ -149,7 +149,7 @@ class GraphicPipeline:
         return fragments
     
 
-    def fragmentShader(self,fragment,data, alpha, color):
+
     def fragmentShader(self,fragment,data, alpha, color):
         #unpacking and normalizing interpolated data
         N = fragment.interpolated_data[0:3]
