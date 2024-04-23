@@ -59,7 +59,7 @@ data = dict([
   #Définition des valeurs des alphas
 
 # Les valeurs des alphas sont comprises entre 0 et 1 : plus alpha est proche de 0, plus l'objet est transparent
-alpha1 = 0.25
+alpha1 = 0.5
 alpha2 = 1
 
   #Création des différentes suzannes
@@ -73,8 +73,8 @@ pipeline1.draw(vertices, triangles, data, alpha1, color, False)
 
 #Création de Suzanne en bleu
 r = 0
-v = 0
-b = 255
+v = 255
+b = 0
 color = np.array([r/255, v/255, b/255])
 pipeline2.draw(vertices2, triangles2, data, alpha2, color, False)
 
@@ -82,7 +82,7 @@ pipeline2.draw(vertices2, triangles2, data, alpha2, color, False)
 
   #création de l'image finale
 
-# On additionne les trois images pour le rendu final
+# On additionne les deux images pour le rendu final
 pipeline4 = pipeline1.image + pipeline2.image
 
 

@@ -182,7 +182,6 @@ class GraphicPipeline:
         b = color[2]    
 
         color = np.array([r*phong, v*phong, b*phong])
-        color = np.array([r*phong, v*phong, b*phong])
 
         #Calcul pour l'alpha blending
         fragment.output = fragment.alpha * color + (1 - fragment.alpha) * alpha
@@ -198,7 +197,6 @@ class GraphicPipeline:
             fragments.extend(self.Rasterizer(newVertices[i[0]], newVertices[i[1]], newVertices[i[2]], alpha, cube))
         
         for f in fragments:
-            self.fragmentShader(f,data, alpha, color)
             self.fragmentShader(f,data, alpha, color)
             #depth test
             if self.depthBuffer[f.y][f.x] > f.depth : 
