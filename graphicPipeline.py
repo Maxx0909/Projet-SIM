@@ -184,7 +184,7 @@ class GraphicPipeline:
         color = np.array([r*phong, v*phong, b*phong])
 
         #Calcul pour l'alpha blending
-        fragment.output = fragment.alpha * color + (1 - fragment.alpha) * alpha
+        fragment.output = fragment.alpha * color + (1 - fragment.alpha) * self.image[fragment.y][fragment.x]
         
 
     def draw(self, vertices, triangles, data, alpha, color, cube):
